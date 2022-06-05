@@ -1,21 +1,29 @@
 import React from "react";
 import {
+  Alert,
+  AlertActionCloseButton,
   LoginForm,
   LoginMainFooterBandItem,
   LoginPage,
-  Checkbox,
-  FormGroup,
-  TextInput,
-  Button,
-  Bullseye,
-  Level,
-  LevelItem,
-  FormHelperText,
 } from "@patternfly/react-core";
-import { ErrorMessage, Form, Formik } from "formik";
-import * as Yup from "yup";
 import ExclamationCircleIcon from "@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon";
-import { TextField } from "src/components/TextField";
+import { SignUpPage } from "./SignUpPage";
+
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2VDqJZ6Xh65TowUvPvjsOzyTBCQU8Ln4",
+  authDomain: "oc-neutral.firebaseapp.com",
+  projectId: "oc-neutral",
+  storageBucket: "oc-neutral.appspot.com",
+  messagingSenderId: "592729192715",
+  appId: "1:592729192715:web:3a82f8fc0f106a7e740a0e",
+  measurementId: "G-KCZ02PVRSG",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export const LoginPageView = () => {
   const [usernameValue, setusernameValue] = React.useState<string>("");
@@ -26,9 +34,7 @@ export const LoginPageView = () => {
   const [signUpFormSelected, setsignUpFormSelected] =
     React.useState<boolean>(false);
 
-  const [showPassword, setshowPassword] = React.useState<boolean>(false);
-  const [termsAndConditions, settermsAndConditions] =
-    React.useState<boolean>(false);
+  const [loginError, setloginError] = React.useState<string>("");
 
   const handleUsernameChange = (value: string) => {
     setusernameValue(value);
@@ -38,11 +44,26 @@ export const LoginPageView = () => {
     setpasswordValue(passwordValue);
   };
 
+  const fbase_login = () => {
+    signInWithEmailAndPassword(auth, usernameValue, passwordValue)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        alert("SUCCESSFULLY SIGNED IN");
+        // ...
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        setloginError(errorMessage);
+      });
+  };
+
   const onLoginButtonClick = (event: any) => {
     event.preventDefault();
     setisValidUsername(!!usernameValue);
     setisValidPassword(!!passwordValue);
     setshowHelperText(!usernameValue || !passwordValue);
+    fbase_login();
   };
 
   const helperText = (
@@ -57,7 +78,14 @@ export const LoginPageView = () => {
       {!signUpFormSelected ? (
         <LoginMainFooterBandItem>
           Need an account?{" "}
-          <a onClick={() => setsignUpFormSelected(true)}>Sign up.</a>
+          <a
+            onClick={() => {
+              setsignUpFormSelected(true);
+              setloginError("");
+            }}
+          >
+            Sign up.
+          </a>
         </LoginMainFooterBandItem>
       ) : (
         <LoginMainFooterBandItem>
@@ -73,7 +101,7 @@ export const LoginPageView = () => {
       showHelperText={showHelperText}
       helperText={helperText}
       helperTextIcon={<ExclamationCircleIcon />}
-      usernameLabel="Username"
+      usernameLabel="Email"
       usernameValue={usernameValue}
       onChangeUsername={handleUsernameChange}
       isValidUsername={isValidUsername}
@@ -87,159 +115,7 @@ export const LoginPageView = () => {
     />
   );
 
-  const signUpForm = (
-    <Formik
-      initialValues={{
-        fullName: "",
-        email: "",
-        password: "",
-      }}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          alert(JSON.stringify(values, null, 2));
-          setSubmitting(false);
-        }, 400);
-        console.log(values)
-      }}
-      validationSchema={Yup.object().shape({
-        fullName: Yup.string()
-          .required("Full name is required")
-          .min(3, "Full name must be at least 3 characters")
-          .max(255, "Full name must be less than 255 characters"),
-        email: Yup.string()
-          .required("Email is required")
-          .email("Email is invalid")
-          .max(255, "Email must be less than 255 characters"),
-        password: Yup.string()
-          .required("Password is required")
-          .min(8, "Password must be at least 8 characters")
-          .max(255, "Password must be less than 255 characters"),
-      })}
-    >
-      {({ isSubmitting, values, errors, handleChange }) => (
-        <Form>
-          <TextField label="Full name" name="fullName" type="text" helperText="Include your middle name if you have one." isRequired/>
-
-          <TextField label="Email" name="email" type="email" helperText="We'll never share your email with anyone else." isRequired/>
-          
-          {/* <FormGroup
-            label="Full name"
-            type="text"
-            helperText={
-              errors.fullName ? (
-                <ErrorMessage name="fullName" component="TextInput" />
-              ) : (
-                <FormHelperText icon={<ExclamationCircleIcon />}>
-                  Include your middle name if you have one.
-                </FormHelperText>
-              )
-            }
-            isRequired
-            fieldId="fullName"
-          >
-            <TextInput
-              type="text"
-              name="fullName"
-              id="fullName"
-              aria-describedby="fullName-helper"
-              onChange={(value) => {
-                values.fullName = value;
-              }}
-            />
-          </FormGroup> */}
-          <br />
-          {/* <FormGroup
-            label="Email"
-            fieldId="email"
-            helperText={
-              errors.email ? (
-                <ErrorMessage name="email" component="TextInput" />
-              ) : (
-                ""
-              )
-            }
-          >
-            <TextInput
-              isRequired
-              type="email"
-              id="email"
-              name="email"
-              aria-describedby="email-helper"
-              onChange={(value) => {
-                values.email = value;
-              }}
-            />
-          </FormGroup> */}
-          <br />
-          <FormGroup
-            label="Password"
-            isRequired
-            fieldId="password"
-            helperText={
-              errors.password ? (
-                <ErrorMessage name="password" component="TextInput" />
-              ) : (
-                ""
-              )
-            }
-          >
-            <Level>
-              <LevelItem style={{ width: "88%" }}>
-                <TextInput
-                  isRequired
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  onChange={(value) => {
-                    values.password = value;
-                  }}
-                />
-              </LevelItem>
-              <LevelItem style={{ width: "12%" }}>
-                <Button
-                  className="pf-c-button pf-m-control"
-                  type="button"
-                  aria-label="Hide password"
-                  onClick={() => setshowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <i className="fas fa-eye-slash" aria-hidden="true"></i>
-                  ) : (
-                    <i className="fas fa-eye" aria-hidden="true"></i>
-                  )}
-                </Button>
-              </LevelItem>
-            </Level>
-          </FormGroup>
-          <br />
-          <FormGroup
-            label="Terms and Conditions"
-            fieldId="simple-form-checkbox-01"
-          >
-            <Checkbox
-              id="simple-form-checkbox-01"
-              name="termsAndConditions"
-              label="I accept the terms and conditions"
-              isChecked={termsAndConditions}
-              onChange={() => settermsAndConditions(!termsAndConditions)}
-            />
-          </FormGroup>
-          <br />
-          <Bullseye>
-            <Button
-              style={{ width: "100%" }}
-              variant="primary"
-              onClick={() => {console.log("Clicked")}}
-              type="submit"
-              isDisabled={isSubmitting || termsAndConditions === false}
-            >
-              Sign Up
-            </Button>
-          </Bullseye>
-        </Form>
-      )}
-    </Formik>
-  );
+  const signUpForm = <SignUpPage />;
 
   const images = {
     lg: "/assets/images/pfbg_1200.jpg",
@@ -267,6 +143,15 @@ export const LoginPageView = () => {
       }
       signUpForAccountMessage={signUpForAccountMessage}
     >
+      {loginError && (
+        <Alert
+          variant="danger"
+          title={loginError.substring(9, loginError.length - 1)}
+          actionClose={
+            <AlertActionCloseButton onClose={() => setloginError("")} />
+          }
+        />
+      )}
       {signUpFormSelected ? signUpForm : loginForm}
     </LoginPage>
   );

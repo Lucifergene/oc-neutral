@@ -1,17 +1,23 @@
-import React from "react";
-import { ErrorMessage, FieldHookConfig, useField } from "formik";
-import { FormGroup, FormHelperText, TextInput } from "@patternfly/react-core";
+import { useState } from "react";
+import { FieldHookConfig, useField } from "formik";
+import {
+  FormGroup,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+  TextInput,
+} from "@patternfly/react-core";
 import ExclamationCircleIcon from "@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon";
 
 interface OtherProps {
   label: string;
   helperText?: string;
-  isRequired?: boolean;
   type?: "text" | "password" | "email" | "number";
 }
 
 export const TextField = (props: OtherProps & FieldHookConfig<string>) => {
   const [field, meta, helpers] = useField(props);
+  const [focus, setFocus] = useState(false);
 
   const { setValue } = helpers;
 
@@ -21,19 +27,10 @@ export const TextField = (props: OtherProps & FieldHookConfig<string>) => {
         label={props.label}
         type={props.type}
         helperText={
-          meta.error ? (
-            <FormHelperText isHidden={!meta.error}>
-              {meta.error}
-              <br />
-            </FormHelperText>
-          ) : (
-            <FormHelperText icon={<ExclamationCircleIcon />}>
-              {props.helperText}
-              <br />
-            </FormHelperText>
-          )
+          <FormHelperText icon={<ExclamationCircleIcon />}>
+            {props.helperText}
+          </FormHelperText>
         }
-        isRequired={props.isRequired}
         fieldId={field.name}
       >
         <TextInput
@@ -45,8 +42,20 @@ export const TextField = (props: OtherProps & FieldHookConfig<string>) => {
             setValue(value);
             console.log(value);
           }}
-          validated={!meta.error ? undefined : "error"}
+          validated={meta.error && focus ? "error" : undefined}
+          onFocus={() => setFocus(true)}
         />
+        {meta.error && focus ? (
+          <HelperText>
+            <HelperTextItem variant="error" hasIcon>
+              {meta.error}
+            </HelperTextItem>
+          </HelperText>
+        ) : (
+          <HelperText>
+            <HelperTextItem>{props.helperText}</HelperTextItem>
+          </HelperText>
+        )}
       </FormGroup>
     </div>
   );
