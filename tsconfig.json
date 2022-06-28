@@ -13,7 +13,8 @@
     "strict": true,
     "paths": {
       "@app/*": ["src/app/*"],
-      "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"]
+      "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
+      "tslib" : ["node_modules/tslib/tslib.d.ts"]
     },
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
@@ -24,7 +25,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "importHelpers": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js"],

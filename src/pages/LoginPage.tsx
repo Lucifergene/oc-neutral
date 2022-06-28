@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Link, useHistory } from "react-router-dom";
 import {
   Alert,
   AlertActionCloseButton,
@@ -7,14 +8,9 @@ import {
   LoginPage,
 } from "@patternfly/react-core";
 import ExclamationCircleIcon from "@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon";
+import { auth, login } from "src/utils/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { SignUpPage } from "./SignUpPage";
-
-import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { firebaseConfig } from "src/utils/firebase";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
 export const LoginPageView = () => {
   const [usernameValue, setusernameValue] = React.useState<string>("");
@@ -27,6 +23,9 @@ export const LoginPageView = () => {
 
   const [loginError, setloginError] = React.useState<string>("");
 
+  const [user, loading, error] = useAuthState(auth);
+  const history = useHistory();
+
   const handleUsernameChange = (value: string) => {
     setusernameValue(value);
   };
@@ -35,26 +34,23 @@ export const LoginPageView = () => {
     setpasswordValue(passwordValue);
   };
 
-  const fbase_login = () => {
-    signInWithEmailAndPassword(auth, usernameValue, passwordValue)
+  const onLoginButtonClick = (event: any) => {
+    event.preventDefault();
+    setisValidUsername(!!usernameValue);
+    setisValidPassword(!!passwordValue);
+    setshowHelperText(!usernameValue || !passwordValue);
+    login(usernameValue, passwordValue)
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
         alert("SUCCESSFULLY SIGNED IN");
+        history.replace("/home");
         // ...
       })
       .catch((error) => {
         const errorMessage = error.message;
         setloginError(errorMessage);
       });
-  };
-
-  const onLoginButtonClick = (event: any) => {
-    event.preventDefault();
-    setisValidUsername(!!usernameValue);
-    setisValidPassword(!!passwordValue);
-    setshowHelperText(!usernameValue || !passwordValue);
-    fbase_login();
   };
 
   const helperText = (
@@ -106,8 +102,6 @@ export const LoginPageView = () => {
     />
   );
 
-  const signUpForm = <SignUpPage />;
-
   const images = {
     lg: "/assets/images/pfbg_1200.jpg",
     sm: "/assets/images/pfbg_768.jpg",
@@ -115,6 +109,8 @@ export const LoginPageView = () => {
     xs: "/assets/images/pfbg_576.jpg",
     xs2x: "/assets/images/pfbg_576@2x.jpg",
   };
+
+  const signUpForm = <SignUpPage />;
 
   return (
     <LoginPage

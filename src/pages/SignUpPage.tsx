@@ -7,23 +7,23 @@ import {
   AlertActionCloseButton,
 } from "@patternfly/react-core";
 import { Form, Formik } from "formik";
-import React from "react";
+import React, { useEffect } from "react";
+import { useHistory } from "react-router";
 import { PasswordField } from "src/components/PasswordField";
 import { TextField } from "src/components/TextField";
 import { signupvalidationSchema } from "src/utils/signup-validation";
 
-import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { getAuth } from "firebase/auth";
-import { firebaseConfig } from "src/utils/firebase";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+import { auth, signup } from "src/utils/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export const SignUpPage = () => {
   const [termsAndConditions, settermsAndConditions] =
     React.useState<boolean>(false);
   const [signUpError, setsignUpError] = React.useState<string>("");
+  const [alert, setAlert] = React.useState<boolean>(false);
+
+  const [user, loading, error] = useAuthState(auth);
+  const history = useHistory();
 
   const initValues = {
     fullName: "",
@@ -33,27 +33,39 @@ export const SignUpPage = () => {
 
   return (
     <>
-      {signUpError && (
+      {alert && signUpError && (
         <Alert
           variant="danger"
-          title={signUpError}
+          title={signUpError.substring(9, signUpError.length - 1)}
           actionClose={
-            <AlertActionCloseButton onClose={() => setsignUpError("")} />
+            <AlertActionCloseButton onClose={() => setAlert(false)} />
           }
         />
       )}
+      {alert && user && !signUpError && (
+        <Alert
+          variant="success"
+          title={`Account created! Please login to continue.`}
+          actionClose={
+            <AlertActionCloseButton onClose={() => setAlert(false)} />
+          }
+        />
+      )}
+
       <Formik
         initialValues={initValues}
-        onSubmit={(values, { setSubmitting }) => {
-          createUserWithEmailAndPassword(auth, values.email, values.password)
-            .then((userCredential) => {
+        onSubmit={(values, { setSubmitting, resetForm }) => {
+          signup(values.email, values.password)
+            .then((userCredential: any) => {
               // Signed in
               const user = userCredential.user;
-              alert("SUCCESSFULLY SIGNED UP");
+              // alert("SUCCESSFULLY SIGNED UP");
               setSubmitting(false);
+              setAlert(true);
             })
             .catch((error) => {
               const errorMessage = error.message;
+              setAlert(true);
               setsignUpError(errorMessage);
             });
 
