@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React from "react";
+import { useHistory } from "react-router-dom";
 import {
   Alert,
   AlertActionCloseButton,
@@ -8,11 +8,12 @@ import {
   LoginPage,
 } from "@patternfly/react-core";
 import ExclamationCircleIcon from "@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon";
-import { auth, login } from "src/utils/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { SignUpPage } from "./SignUpPage";
+import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { auth } from "src/utils/firebase";
 
 export const LoginPageView = () => {
+  const [alert, setAlert] = React.useState<boolean>(true);
   const [usernameValue, setusernameValue] = React.useState<string>("");
   const [passwordValue, setpasswordValue] = React.useState<string>("");
   const [showHelperText, setshowHelperText] = React.useState<boolean>(false);
@@ -21,9 +22,13 @@ export const LoginPageView = () => {
   const [signUpFormSelected, setsignUpFormSelected] =
     React.useState<boolean>(false);
 
-  const [loginError, setloginError] = React.useState<string>("");
+  const [
+    signInWithEmailAndPassword,
+    user,
+    loading,
+    error,
+  ] = useSignInWithEmailAndPassword(auth);
 
-  const [user, loading, error] = useAuthState(auth);
   const history = useHistory();
 
   const handleUsernameChange = (value: string) => {
@@ -39,18 +44,18 @@ export const LoginPageView = () => {
     setisValidUsername(!!usernameValue);
     setisValidPassword(!!passwordValue);
     setshowHelperText(!usernameValue || !passwordValue);
-    login(usernameValue, passwordValue)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        alert("SUCCESSFULLY SIGNED IN");
-        history.replace("/home");
-        // ...
-      })
-      .catch((error) => {
-        const errorMessage = error.message;
-        setloginError(errorMessage);
-      });
+    signInWithEmailAndPassword(usernameValue, passwordValue)
+    user && history.replace("/home");
+      // .then(() => {
+      //   // Signed in
+      //   console.log("Signed In: ", user);
+      //   alert("SUCCESSFULLY SIGNED IN");
+      //   history.replace("/home");
+      //   // ...
+      // })
+      // .catch((error) => {
+      //   setloginError(error);
+      // });
   };
 
   const helperText = (
@@ -68,7 +73,7 @@ export const LoginPageView = () => {
           <a
             onClick={() => {
               setsignUpFormSelected(true);
-              setloginError("");
+              setAlert(false);
             }}
           >
             Sign up.
@@ -114,13 +119,13 @@ export const LoginPageView = () => {
 
   return (
     <LoginPage
-      brandImgAlt="Openshift Neutral"
+      brandImgAlt="Neutral"
       backgroundImgSrc={images}
       backgroundImgAlt="Images"
       textContent="This is placeholder text only. Use this area to place any information or introductory message about your application that may be relevant to users."
       loginTitle={
         signUpFormSelected
-          ? "Sign Up to Openshift Neutral"
+          ? "Sign Up to Neutral"
           : "Log in to your account"
       }
       loginSubtitle={
@@ -130,13 +135,19 @@ export const LoginPageView = () => {
       }
       signUpForAccountMessage={signUpForAccountMessage}
     >
-      {loginError && (
+      {alert && error && (
         <Alert
           variant="danger"
-          title={loginError.substring(9, loginError.length - 1)}
+          title={error.message.substring(9, error.message.length - 1)}
           actionClose={
-            <AlertActionCloseButton onClose={() => setloginError("")} />
+            <AlertActionCloseButton onClose={() => setAlert(false)} />
           }
+        />
+      )}
+        {loading && (
+        <Alert
+          variant="success"
+          title="Loading..."
         />
       )}
       {signUpFormSelected ? signUpForm : loginForm}

@@ -1,13 +1,14 @@
 import { Bullseye, Title } from "@patternfly/react-core";
 import React from "react";
+import HomeImg from "../assets/images/home.png";
 
-export default function Overview() {
+export default function Overview({ currentUser }) {
+  const user = currentUser.email.split("@")[0];
   return (
     <>
-      <Bullseye>
-        {" "}
-        <Title headingLevel="h1">Welcome to Openshift Neutral</Title>
-      </Bullseye>
+      <div style={{ height: "100vh" }}>        
+        <img src={HomeImg} alt="home" />
+      </div>
     </>
   );
 }

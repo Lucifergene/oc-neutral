@@ -7,22 +7,23 @@ import {
   AlertActionCloseButton,
 } from "@patternfly/react-core";
 import { Form, Formik } from "formik";
-import React, { useEffect } from "react";
+import React from "react";
 import { useHistory } from "react-router";
 import { PasswordField } from "src/components/PasswordField";
 import { TextField } from "src/components/TextField";
 import { signupvalidationSchema } from "src/utils/signup-validation";
-
-import { auth, signup } from "src/utils/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { auth } from "src/utils/firebase";
 
 export const SignUpPage = () => {
   const [termsAndConditions, settermsAndConditions] =
     React.useState<boolean>(false);
-  const [signUpError, setsignUpError] = React.useState<string>("");
-  const [alert, setAlert] = React.useState<boolean>(false);
+  // const [signUpError, setsignUpError] = React.useState<string>("");
+  const [alert, setAlert] = React.useState<boolean>(true);
 
-  const [user, loading, error] = useAuthState(auth);
+  const [createUserWithEmailAndPassword, user, loading, error] =
+    useCreateUserWithEmailAndPassword(auth);
+
   const history = useHistory();
 
   const initValues = {
@@ -33,16 +34,16 @@ export const SignUpPage = () => {
 
   return (
     <>
-      {alert && signUpError && (
+      {alert && error && (
         <Alert
           variant="danger"
-          title={signUpError.substring(9, signUpError.length - 1)}
+          title={error.message.substring(9, error.message.length - 1)}
           actionClose={
             <AlertActionCloseButton onClose={() => setAlert(false)} />
           }
         />
       )}
-      {alert && user && !signUpError && (
+      {alert && user && !error && (
         <Alert
           variant="success"
           title={`Account created! Please login to continue.`}
@@ -55,19 +56,7 @@ export const SignUpPage = () => {
       <Formik
         initialValues={initValues}
         onSubmit={(values, { setSubmitting, resetForm }) => {
-          signup(values.email, values.password)
-            .then((userCredential: any) => {
-              // Signed in
-              const user = userCredential.user;
-              // alert("SUCCESSFULLY SIGNED UP");
-              setSubmitting(false);
-              setAlert(true);
-            })
-            .catch((error) => {
-              const errorMessage = error.message;
-              setAlert(true);
-              setsignUpError(errorMessage);
-            });
+          createUserWithEmailAndPassword(values.email, values.password)
 
           // setTimeout(() => {
           //   alert(JSON.stringify(values, null, 2));

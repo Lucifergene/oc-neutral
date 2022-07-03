@@ -16,8 +16,8 @@ import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { randomString } from "../utils/helpers";
 import { Alert } from "@patternfly/react-core/dist/esm/components";
 
-const UploadConfig = () => {
-  const user = "avika";
+const UploadConfig = ({currentUser}) => {
+  const user = currentUser.email.split("@")[0];
   const file = useRef<any>(null);
   const generatedFileName = useRef<string>("");
   const fileURL = useRef<any>("");
@@ -41,9 +41,10 @@ const UploadConfig = () => {
           ...querySnapshot.docs[0].data().configs,
           {
             name: generatedFileName.current,
-            displayName: "Demo3",
+            displayName: randomString(),
             updatedAt: Timestamp.now(),
             configURL: fileURL.current,
+            connected: false,
           },
         ],
       });
@@ -59,6 +60,7 @@ const UploadConfig = () => {
             displayName: randomString(),
             updatedAt: Timestamp.now(),
             configURL: fileURL.current,
+            connected: false,
           },
         ],
       });

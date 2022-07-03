@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Spinner,
   Title,
@@ -11,22 +12,29 @@ import {
   Td,
   Tbody,
 } from "@patternfly/react-table";
-import CheckIcon from "@patternfly/react-icons/dist/esm/icons/check-icon";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   collection,
   query,
-  orderBy,
-  onSnapshot,
   getDocs,
   where,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 import { firestore } from "../utils/firebase";
 import { Bullseye } from "@patternfly/react-core";
+import { fixDate } from "src/utils/helpers";
 
-export default function ConfigList() {
-  const user = "avika";
+export default function ConfigList({ currentUser }) {
+  // const user = "avika";
+  const user = currentUser.email.split("@")[0];
   const [loading, setLoading] = useState(true);
+  const connectBtnRef = useRef<any>();
+  const [toggleConnected, setToggleConnected] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const errorRef = useRef<any>();
+  // const [selectedConfig, setSelectedConfig] = useState<string>("");
+  const [resStatus, setResStatus] = useState("");
 
   const configs = useRef<any>([]);
 
@@ -40,28 +48,137 @@ export default function ConfigList() {
       if (querySnapshot.docs.length > 0) {
         configs.current = querySnapshot.docs[0].data().configs;
         console.log("dfsdf: ", querySnapshot.docs[0].data().configs);
-        console.log("!!!!!Getting all ToDos: ", configs.current);
+        console.log("!!!!!Getting all Configs: ", configs.current);
       }
       setLoading(false);
     };
     fetchConfigs();
-  }, []);
+    console.log("!!!!!!!!!!!!!s: ", toggleConnected, error);
+  }, [error]);
 
-  const fixDate = (date) => {
-    const foo: Date = new Date(date.toDate());
-    const options: any = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    };
-    return foo.toLocaleDateString("en-US", options);
+  const updateConnectedStatus = async (status, config) => {
+    const recordRef = collection(firestore, "kubeconfig_mapping");
+    const q = query(recordRef, where("user", "==", user));
+    const querySnapshot = await getDocs(q);
+
+    if (status === "disconnect") {
+      if (querySnapshot.docs.length > 0) {
+        const docRef = doc(recordRef, querySnapshot.docs[0].id);
+        console.log(docRef);
+        await updateDoc(docRef, {
+          configs: [
+            ...querySnapshot.docs[0]
+              .data()
+              .configs.filter((e) => e.name !== config.name),
+            {
+              ...config,
+              connected: false,
+            },
+          ],
+        });
+      }
+    } else {
+      if (querySnapshot.docs.length > 0) {
+        const docRef = doc(recordRef, querySnapshot.docs[0].id);
+        console.log(docRef);
+        await updateDoc(docRef, {
+          configs: [
+            ...querySnapshot.docs[0]
+              .data()
+              .configs.filter((e) => e.name !== config.name),
+            {
+              ...config,
+              connected: true,
+            },
+          ],
+        });
+      }
+    }
+    console.log("Successfully Updated");
   };
 
-  const handleClick = (config: any) => {
-    console.log("clicked: ", config);
+  const handleConnect = async (config: any) => {
+    setLoading(true);
+    const updatedConfig = {
+      ...config,
+      updatedAt: fixDate(config.updatedAt),
+      user: user,
+    };
+    console.log("clicked: ", updatedConfig);
+
+    await fetch("http://localhost:9001/test-connect", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams(updatedConfig),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log("data: ", data);
+        console.log("Ref: ", connectBtnRef);
+        setResStatus(data.status);
+        if (data.status !== "OK") {
+          setError(data.status);
+          // errorRef.current = data.status;
+        }
+        setToggleConnected(true);
+        // setSelectedConfig(config.name);
+        console.log("Starting to Update");
+        updateConnectedStatus("connect", config);
+      })
+      .catch((err) => {
+        console.log("err: ", err);
+        setError(err);
+      });
+    setLoading(false);
+    console.log("Completed");
+    //   await axios
+    //     .post(
+    //       "http://localhost:9001/test-connect",
+    //       updatedConfig,
+    //       {headers}
+    //     )
+    //     .then((res) => {
+    //       console.log("res: ", res);
+    //       console.log("Ref: ", connectBtnRef);
+    //       connectBtnRef.current.childNodes[0].textContent = "Connected";
+    //     })
+    //     .catch((err) => {
+    //       console.log("err: ", err);
+    //     });
+  };
+
+  const handleDisconnect = async (config: any) => {
+    setLoading(true);
+    const updatedConfig = {
+      ...config,
+      updatedAt: fixDate(config.updatedAt),
+      user: user,
+    };
+    console.log("clicked: ", updatedConfig);
+
+    const headers = {
+      "Content-Type": "application/x-www-form-urlencoded",
+    };
+
+    await fetch("http://localhost:9001/disconnect-cluster", {
+      method: "POST",
+      headers: headers,
+      body: new URLSearchParams(updatedConfig),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log("disconnect: ", data.status);
+        updateConnectedStatus("disconnect", config);
+      })
+      .catch((err) => {
+        console.log("err: ", err);
+      });
   };
 
   const emptyListStyle = {
@@ -80,6 +197,23 @@ export default function ConfigList() {
     <div style={{ height: "100vh" }}>
       {" "}
       <Title headingLevel="h1">Your Kubernetes Configurations</Title>
+      <br />
+      {resStatus && (
+        <Alert
+          variant={resStatus === "OK" ? "success" : "danger"}
+          title={
+            resStatus === "OK"
+              ? "Cluster Successfully Connected"
+              : "Unexpected Error. Please Try Again"
+          }
+        />
+      )}
+      {loading && (
+        <Alert
+          variant="warning"
+          title="Loading Configurations. Please wait..."
+        />
+      )}
       <br />
       <div>
         {loading ? (
@@ -114,17 +248,23 @@ export default function ConfigList() {
                   </Td>
                   <Td>
                     <Button
-                      variant="secondary"
+                      ref={connectBtnRef}
+                      variant={"secondary"}
                       onClick={() => {
-                        handleClick({
-                          name: config.name,
-                          displayName: config.displayName,
-                          createdAt: config.createdAt,
-                          configURL: config.configURL,
-                        });
+                        handleConnect(config);
                       }}
+                      isDisabled={config.connected || toggleConnected}
                     >
-                      Connect
+                      {"Connect"}
+                    </Button>{" "}
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => {
+                        handleDisconnect(config);
+                      }}
+                      isDisabled={!config.connected}
+                    >
+                      Disconnect
                     </Button>
                   </Td>
                 </Tr>

@@ -1,5 +1,6 @@
 {
   "name": "oc-neutral",
+  "proxy":"http://localhost:9001",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -14,6 +15,7 @@
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "axios": "^0.27.2",
     "firebase": "^9.8.2",
     "formik": "^2.2.9",
     "node-sass": "^7.0.1",

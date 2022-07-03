@@ -28,6 +28,6 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "src/pages/Home"],
   "exclude": ["node_modules"]
 }
