@@ -11,6 +11,8 @@ import ExclamationCircleIcon from "@patternfly/react-icons/dist/esm/icons/exclam
 import { SignUpPage } from "./SignUpPage";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { auth } from "src/utils/firebase";
+import imgBrand from "../assets/images/logo.webp";
+import bgImg from "../assets/images/pfbg_1200.webp";
 
 export const LoginPageView = () => {
   const [alert, setAlert] = React.useState<boolean>(true);
@@ -22,12 +24,8 @@ export const LoginPageView = () => {
   const [signUpFormSelected, setsignUpFormSelected] =
     React.useState<boolean>(false);
 
-  const [
-    signInWithEmailAndPassword,
-    user,
-    loading,
-    error,
-  ] = useSignInWithEmailAndPassword(auth);
+  const [signInWithEmailAndPassword, user, loading, error] =
+    useSignInWithEmailAndPassword(auth);
 
   const history = useHistory();
 
@@ -44,18 +42,18 @@ export const LoginPageView = () => {
     setisValidUsername(!!usernameValue);
     setisValidPassword(!!passwordValue);
     setshowHelperText(!usernameValue || !passwordValue);
-    signInWithEmailAndPassword(usernameValue, passwordValue)
+    signInWithEmailAndPassword(usernameValue, passwordValue);
     user && history.replace("/home");
-      // .then(() => {
-      //   // Signed in
-      //   console.log("Signed In: ", user);
-      //   alert("SUCCESSFULLY SIGNED IN");
-      //   history.replace("/home");
-      //   // ...
-      // })
-      // .catch((error) => {
-      //   setloginError(error);
-      // });
+    // .then(() => {
+    //   // Signed in
+    //   console.log("Signed In: ", user);
+    //   alert("SUCCESSFULLY SIGNED IN");
+    //   history.replace("/home");
+    //   // ...
+    // })
+    // .catch((error) => {
+    //   setloginError(error);
+    // });
   };
 
   const helperText = (
@@ -107,26 +105,16 @@ export const LoginPageView = () => {
     />
   );
 
-  const images = {
-    lg: "/assets/images/pfbg_1200.jpg",
-    sm: "/assets/images/pfbg_768.jpg",
-    sm2x: "/assets/images/pfbg_768@2x.jpg",
-    xs: "/assets/images/pfbg_576.jpg",
-    xs2x: "/assets/images/pfbg_576@2x.jpg",
-  };
-
   const signUpForm = <SignUpPage />;
 
   return (
     <LoginPage
+      brandImgSrc={imgBrand}
       brandImgAlt="Neutral"
-      backgroundImgSrc={images}
+      backgroundImgSrc={bgImg}
       backgroundImgAlt="Images"
-      textContent="This is placeholder text only. Use this area to place any information or introductory message about your application that may be relevant to users."
       loginTitle={
-        signUpFormSelected
-          ? "Sign Up to Neutral"
-          : "Log in to your account"
+        signUpFormSelected ? "Sign Up to Neutral" : "Log in to your account"
       }
       loginSubtitle={
         signUpFormSelected
@@ -144,12 +132,7 @@ export const LoginPageView = () => {
           }
         />
       )}
-        {loading && (
-        <Alert
-          variant="success"
-          title="Loading..."
-        />
-      )}
+      {loading && <Alert variant="success" title="Loading..." />}
       {signUpFormSelected ? signUpForm : loginForm}
     </LoginPage>
   );
