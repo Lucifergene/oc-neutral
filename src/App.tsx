@@ -1,24 +1,24 @@
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import "./App.css";
 import { SignUpPage } from "./pages/SignUpPage";
 import "@patternfly/patternfly/patternfly.css";
 import "@patternfly/react-core/dist/styles/base.css";
 import {
-  Page,
+  Divider,
   PageSection,
   PageSectionVariants,
 } from "@patternfly/react-core/dist/esm/components";
-import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
 import { LoginPageView as LoginPage } from "./pages/LoginPage";
 import { useState } from "react";
 import UploadConfig from "./pages/UploadConfig";
 import Overview from "./pages/Overview";
 import ConfigList from "./pages/ConfigList";
 import Deployments from "./pages/Deployments";
+import DashboardWrapper from "./components/DashboardWrapper";
 import Services from "./pages/Services";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "./utils/firebase";
+
 
 export default function App() {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -71,19 +71,18 @@ export default function App() {
   } else {
     return (
       <>
-        <Page
-          header={
-            <Navbar
-              isNavOpen={isNavOpen}
-              setIsNavOpen={setIsNavOpen}
-              currentUser={user}
-            />
-          }
-          sidebar={<Sidebar isNavOpen={isNavOpen} settings={settings} />}
-          isManagedSidebar
+        <DashboardWrapper
+          mainContainerId="main-content-page-layout-default-nav"
+          currentUser={user}
+          settings={settings}
           onPageResize={onPageResize}
+          isNavOpen={isNavOpen}
+          setIsNavOpen={setIsNavOpen}
         >
-          <PageSection variant={PageSectionVariants.light}>
+          <Divider component="div" />
+          <PageSection
+            variant={PageSectionVariants.light}
+          >
             <div>
               <Switch>
                 <Route exact path="/home" component={Overview}>
@@ -110,7 +109,7 @@ export default function App() {
               </Switch>
             </div>
           </PageSection>
-        </Page>
+        </DashboardWrapper>
       </>
     );
   }

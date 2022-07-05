@@ -44,7 +44,7 @@ export default function Resources({ setting }) {
   const columnNames = setting.resourceColumnNames;
   const columnsKeys = Object.keys(columnNames);
   return (
-    <div style={{ height: "100vh" }}>
+    <div>
       {" "}
       <Title headingLevel="h1">{setting.resourcePluralName}</Title>
       <br />

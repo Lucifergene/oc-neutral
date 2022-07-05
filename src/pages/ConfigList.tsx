@@ -194,7 +194,7 @@ export default function ConfigList({ currentUser }) {
   };
   console.log("configurations: ", configs.current);
   return (
-    <div style={{ height: "100vh" }}>
+    <div>
       {" "}
       <Title headingLevel="h1">Your Kubernetes Configurations</Title>
       <br />

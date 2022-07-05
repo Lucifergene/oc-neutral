@@ -20,7 +20,7 @@ export default function Services({ setting }) {
   };
 
   return (
-    <div style={{ height: "100vh" }}>
+    <div>
       {" "}
       <Level>
         <LevelItem span={9}>

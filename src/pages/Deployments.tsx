@@ -30,7 +30,7 @@ export default function Deployments({ setting }) {
   console.log("error: ", error);
 
   return (
-    <div style={{ height: "100vh" }}>
+    <div>
       {" "}
       <Level>
         <LevelItem span={9}>

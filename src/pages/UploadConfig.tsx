@@ -109,7 +109,7 @@ const UploadConfig = ({currentUser}) => {
   };
 
   return (
-    <div style={{ height: "100vh" }}>
+    <div>
       {/* <h2 className="home-h2">File Upload & Image Preview</h2>
       <p className="lead home-p">
         No Plugins <b>Just Javascript</b>
