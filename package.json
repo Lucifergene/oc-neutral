@@ -1,6 +1,6 @@
 {
   "name": "oc-neutral",
-  "proxy":"http://localhost:9001",
+  "proxy":"https://neutral-backend.herokuapp.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

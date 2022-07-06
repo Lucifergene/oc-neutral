@@ -106,7 +106,7 @@ export default function ConfigList({ currentUser }) {
     };
     console.log("clicked: ", updatedConfig);
 
-    await fetch("http://localhost:9001/test-connect", {
+    await fetch("https://neutral-backend.herokuapp.com/test-connect", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -137,7 +137,7 @@ export default function ConfigList({ currentUser }) {
     console.log("Completed");
     //   await axios
     //     .post(
-    //       "http://localhost:9001/test-connect",
+    //       "https://neutral-backend.herokuapp.com/test-connect",
     //       updatedConfig,
     //       {headers}
     //     )
@@ -164,7 +164,7 @@ export default function ConfigList({ currentUser }) {
       "Content-Type": "application/x-www-form-urlencoded",
     };
 
-    await fetch("http://localhost:9001/disconnect-cluster", {
+    await fetch("https://neutral-backend.herokuapp.com/disconnect-cluster", {
       method: "POST",
       headers: headers,
       body: new URLSearchParams(updatedConfig),

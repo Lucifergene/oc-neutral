@@ -30,7 +30,7 @@ export default function App() {
       resourceNameLower: "deployment",
       resourcePluralName: "Deployments",
       resourcePluralNamePluralLower: "deployments",
-      resourceAPIGetURL: "http://localhost:9001/deployments",
+      resourceAPIGetURL: "https://neutral-backend.herokuapp.com/deployments",
       resourceColumnNames: {
         name: "Name",
         namespace: "Namespace",
@@ -43,7 +43,7 @@ export default function App() {
       resourceNameLower: "service",
       resourcePluralName: "Services",
       resourcePluralNamePluralLower: "services",
-      resourceAPIGetURL: "http://localhost:9001/services",
+      resourceAPIGetURL: "https://neutral-backend.herokuapp.com/services",
       resourceColumnNames: {
         name: "Name",
         namespace: "Namespace",
